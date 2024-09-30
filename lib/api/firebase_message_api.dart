@@ -1,11 +1,12 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 
 @pragma('vm:entry-point')
 Future<void> handleBackgroundMessage(RemoteMessage message) async {
-  print('Handling a background message: ${message.messageId}');
-  print('title: ${message.notification?.title}');
-  print('body: ${message.notification?.body}');
-  print('payload: ${message.data}');
+  debugPrint('Handling a background message: ${message.messageId}');
+  debugPrint('title: ${message.notification?.title}');
+  debugPrint('body: ${message.notification?.body}');
+  debugPrint('payload: ${message.data}');
 }
 
 class FirebaseMessageApi {
@@ -17,7 +18,7 @@ class FirebaseMessageApi {
 
     // Get the token for this device
     final token = await _firebaseMessaging.getToken();
-    print('Token: $token');
+    debugPrint('Token: $token');
 
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
   }
