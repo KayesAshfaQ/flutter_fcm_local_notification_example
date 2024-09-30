@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "103844629910",
+    "project_id": "fcm-and-local-notification",
+    "storage_bucket": "fcm-and-local-notification.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:103844629910:android:0f00348feba220017561b7",
+        "android_client_info": {
+          "package_name": "com.example.flutter_fcm_local_notification_example"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC92qO4RmHwRSZI1_j0FkqHh1fnYfxjrGk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
