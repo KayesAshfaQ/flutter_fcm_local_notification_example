@@ -2,6 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_fcm_local_notification_example/main.dart';
 import 'package:flutter_fcm_local_notification_example/pages/notification_page.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 @pragma('vm:entry-point')
 Future<void> handleBackgroundMessage(RemoteMessage message) async {
@@ -14,6 +15,13 @@ Future<void> handleBackgroundMessage(RemoteMessage message) async {
 class FirebaseMessageApi {
   final _firebaseMessaging = FirebaseMessaging.instance;
 
+  final _androidNotificationChannel = const AndroidNotificationChannel(
+    'high_importance_channel', // id
+    'High Importance Notifications', // title
+    description: 'This channel is used for important notifications.', // description
+    importance: Importance.high,
+  );
+
   Future<void> initialize() async {
     // Request permission for iOS devices to receive notifications
     await _firebaseMessaging.requestPermission();
@@ -25,8 +33,8 @@ class FirebaseMessageApi {
     // Initialize push notifications
     await initPushNotification();
   }
-  
-  /// handles message actions 
+
+  /// handles message actions
   void handleMessage(RemoteMessage? message) {
     debugPrint('Handling a message: ${message?.messageId}');
 
