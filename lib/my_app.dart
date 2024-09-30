@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'pages/home_page.dart';
+import 'pages/notification_page.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -13,7 +14,11 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const HomePage(title: 'Home Page'),
+      initialRoute: HomePage.route,
+      routes: {
+        HomePage.route: (context) => const HomePage(),
+        NotificationPage.route: (context) => const NotificationPage(),
+      },
     );
   }
 }
