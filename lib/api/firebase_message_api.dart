@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_fcm_local_notification_example/main.dart';
@@ -22,6 +24,8 @@ class FirebaseMessageApi {
     importance: Importance.high,
   );
 
+  final _localNotifications = FlutterLocalNotificationsPlugin();
+
   Future<void> initialize() async {
     // Request permission for iOS devices to receive notifications
     await _firebaseMessaging.requestPermission();
@@ -31,7 +35,10 @@ class FirebaseMessageApi {
     debugPrint('Token: $token');
 
     // Initialize push notifications
-    await initPushNotification();
+    initPushNotification();
+
+    // Initialize local notifications
+    initLocalNotifications();
   }
 
   /// handles message actions
@@ -47,6 +54,26 @@ class FirebaseMessageApi {
       NotificationPage.route,
       arguments: message,
     );
+  }
+
+  Future initLocalNotifications() async {
+    // initialize the local notifications plugin
+    const androidInitializationSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const iOSInitializationSettings = DarwinInitializationSettings();
+    const initializationSettings = InitializationSettings(android: androidInitializationSettings, iOS: iOSInitializationSettings);
+    await _localNotifications.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (details) {
+        final message = RemoteMessage.fromMap(jsonDecode(details.payload ?? '{}'));
+        handleMessage(message);
+      },
+    );
+
+    // platform-specific initialization
+    final platform = _localNotifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+
+    // create the notification channel
+    await platform?.createNotificationChannel(_androidNotificationChannel);
   }
 
   Future initPushNotification() async {
@@ -65,5 +92,31 @@ class FirebaseMessageApi {
 
     // get calls, when the app is in the background or terminated state
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
+
+    // listen for messages when the app is in the foreground state
+    FirebaseMessaging.onMessage.listen((message) {
+      final notification = message.notification;
+
+      // if notification is null, return
+      if (notification == null) {
+        return;
+      }
+
+      // otherwise, show notification
+      _localNotifications.show(
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              _androidNotificationChannel.id,
+              _androidNotificationChannel.name,
+              channelDescription: _androidNotificationChannel.description,
+              importance: _androidNotificationChannel.importance,
+              icon: '@mipmap/ic_launcher',
+            ),
+          ),
+          payload: jsonEncode(message.toMap()));
+    });
   }
 }
