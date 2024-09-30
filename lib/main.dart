@@ -5,6 +5,8 @@ import 'api/firebase_message_api.dart';
 import 'firebase_options.dart';
 import 'my_app.dart';
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   // ensure flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,5 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_fcm_local_notification_example/main.dart';
+import 'package:flutter_fcm_local_notification_example/pages/notification_page.dart';
 
 @pragma('vm:entry-point')
 Future<void> handleBackgroundMessage(RemoteMessage message) async {
@@ -20,6 +22,40 @@ class FirebaseMessageApi {
     final token = await _firebaseMessaging.getToken();
     debugPrint('Token: $token');
 
+    // Initialize push notifications
+    await initPushNotification();
+  }
+  
+  /// handles message actions 
+  void handleMessage(RemoteMessage? message) {
+    debugPrint('Handling a message: ${message?.messageId}');
+
+    if (message == null) {
+      debugPrint('Message is null');
+      return;
+    }
+
+    navigatorKey.currentState?.pushNamed(
+      NotificationPage.route,
+      arguments: message,
+    );
+  }
+
+  Future initPushNotification() async {
+    // set presentation options for foreground notifications on iOS
+    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    // perform actions when app is open from a terminated state
+    FirebaseMessaging.instance.getInitialMessage().then(handleMessage);
+
+    // perform actions when app is open from a background state
+    FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
+
+    // get calls, when the app is in the background or terminated state
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
   }
 }

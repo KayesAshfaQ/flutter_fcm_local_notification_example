@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'main.dart';
 import 'pages/home_page.dart';
 import 'pages/notification_page.dart';
 
@@ -10,6 +11,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      navigatorKey: navigatorKey,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
