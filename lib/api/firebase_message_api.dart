@@ -34,11 +34,11 @@ class FirebaseMessageApi {
     final token = await _firebaseMessaging.getToken();
     debugPrint('Token: $token');
 
-    // Initialize push notifications
-    initPushNotification();
-
     // Initialize local notifications
     initLocalNotifications();
+
+    // Initialize push notifications
+    initPushNotification();
   }
 
   /// handles message actions
@@ -90,10 +90,10 @@ class FirebaseMessageApi {
     // perform actions when app is open from a background state
     FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
 
-    // get calls, when the app is in the background or terminated state
+    // get calls, when the app is in the background or terminated state, and the message is received
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
 
-    // listen for messages when the app is in the foreground state
+    // listen for messages when the app is in the foreground state 
     FirebaseMessaging.onMessage.listen((message) {
       final notification = message.notification;
 
@@ -104,19 +104,20 @@ class FirebaseMessageApi {
 
       // otherwise, show notification
       _localNotifications.show(
-          notification.hashCode,
-          notification.title,
-          notification.body,
-          NotificationDetails(
-            android: AndroidNotificationDetails(
-              _androidNotificationChannel.id,
-              _androidNotificationChannel.name,
-              channelDescription: _androidNotificationChannel.description,
-              importance: _androidNotificationChannel.importance,
-              icon: '@mipmap/ic_launcher',
-            ),
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            _androidNotificationChannel.id,
+            _androidNotificationChannel.name,
+            channelDescription: _androidNotificationChannel.description,
+            importance: _androidNotificationChannel.importance,
+            icon: '@mipmap/ic_launcher',
           ),
-          payload: jsonEncode(message.toMap()));
+        ),
+        payload: jsonEncode(message.toMap()),
+      );
     });
   }
 }
