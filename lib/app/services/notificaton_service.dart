@@ -18,7 +18,7 @@ Future<void> handleBackgroundMessage(RemoteMessage message) async {
   debugPrint('payload: ${message.data}');
 }
 
-class FirebaseMessageApi {
+class NotificationService {
   final _firebaseMessaging = FirebaseMessaging.instance;
   final _localNotifications = FlutterLocalNotificationsPlugin();
   final _androidNotificationChannel = const AndroidNotificationChannel(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_fcm_local_notification_example/app/services/fcm_service.dart';
 
 class HomePage extends StatefulWidget {
   static const route = '/';
@@ -13,9 +12,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   void onInitState() {
     super.initState();
-
-    // check if the app was opened from a notification
-    // FCMService.onOpenAppFromTerminatedState();
   }
 
   @override
