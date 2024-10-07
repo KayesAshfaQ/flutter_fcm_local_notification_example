@@ -8,7 +8,7 @@ class NotificationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final message = ModalRoute.of(context)!.settings.arguments as RemoteMessage;
+    final RemoteMessage? message = ModalRoute.of(context)!.settings.arguments as RemoteMessage?;
 
     return Scaffold(
       appBar: AppBar(
@@ -23,7 +23,7 @@ class NotificationPage extends StatelessWidget {
             const Text(
               'This is the notification page',
             ),
-            if (message.notification != null)
+            if (message != null && message.notification != null)
               Column(
                 children: <Widget>[
                   Text(

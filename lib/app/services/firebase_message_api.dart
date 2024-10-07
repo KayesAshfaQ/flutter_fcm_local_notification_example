@@ -1,10 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_fcm_local_notification_example/main.dart';
-import 'package:flutter_fcm_local_notification_example/app/pages/notification_page.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+
+import '../../main.dart';
+import '../pages/notification_page.dart';
 
 @pragma('vm:entry-point')
 Future<void> handleBackgroundMessage(RemoteMessage message) async {
@@ -16,15 +20,13 @@ Future<void> handleBackgroundMessage(RemoteMessage message) async {
 
 class FirebaseMessageApi {
   final _firebaseMessaging = FirebaseMessaging.instance;
-
+  final _localNotifications = FlutterLocalNotificationsPlugin();
   final _androidNotificationChannel = const AndroidNotificationChannel(
     'high_importance_channel', // id
     'High Importance Notifications', // title
     description: 'This channel is used for important notifications.', // description
     importance: Importance.high,
   );
-
-  final _localNotifications = FlutterLocalNotificationsPlugin();
 
   Future<void> initialize() async {
     // Request permission for iOS devices to receive notifications
@@ -93,7 +95,7 @@ class FirebaseMessageApi {
     // get calls, when the app is in the background or terminated state, and the message is received
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
 
-    // listen for messages when the app is in the foreground state 
+    // listen for messages when the app is in the foreground state
     FirebaseMessaging.onMessage.listen((message) {
       final notification = message.notification;
 
@@ -103,21 +105,76 @@ class FirebaseMessageApi {
       }
 
       // otherwise, show notification
-      _localNotifications.show(
-        notification.hashCode,
-        notification.title,
-        notification.body,
-        NotificationDetails(
-          android: AndroidNotificationDetails(
-            _androidNotificationChannel.id,
-            _androidNotificationChannel.name,
-            channelDescription: _androidNotificationChannel.description,
-            importance: _androidNotificationChannel.importance,
-            icon: '@mipmap/ic_launcher',
-          ),
-        ),
-        payload: jsonEncode(message.toMap()),
-      );
+      _showNotification(message);
     });
+  }
+
+  _showNotification(RemoteMessage message) async {
+    String? bigPicturePath;
+    final notification = message.notification;
+
+    // if notification is null, return
+    if (notification == null) {
+      return;
+    }
+
+    if (notification.android?.imageUrl != null) {
+      bigPicturePath = await _downloadAndSaveImage(
+        notification.android!.imageUrl!,
+        'notification_image_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      );
+    }
+
+    final bigPictureStyleInformation = bigPicturePath != null
+        ? BigPictureStyleInformation(
+            FilePathAndroidBitmap(bigPicturePath),
+            contentTitle: notification.title,
+            htmlFormatContentTitle: true,
+            summaryText: notification.body,
+            htmlFormatSummaryText: true,
+          )
+        : null;
+
+    final androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'fcm_default_channel',
+      'fcm_default_channel_name',
+      importance: Importance.max,
+      priority: Priority.high,
+      styleInformation: bigPictureStyleInformation,
+    );
+    final iOSPlatformChannelSpecifics = DarwinNotificationDetails(
+      attachments: bigPicturePath != null ? [DarwinNotificationAttachment(bigPicturePath)] : null,
+    );
+    final platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics,
+    );
+
+    _localNotifications.show(
+      notification.hashCode,
+      notification.title,
+      notification.body,
+      platformChannelSpecifics,
+      // NotificationDetails(
+      //   android: AndroidNotificationDetails(
+      //     _androidNotificationChannel.id,
+      //     _androidNotificationChannel.name,
+      //     channelDescription: _androidNotificationChannel.description,
+      //     importance: _androidNotificationChannel.importance,
+      //     icon: '@mipmap/ic_launcher',
+      //   ),
+      // ),
+      payload: jsonEncode(message.toMap()),
+    );
+  }
+
+  Future<String> _downloadAndSaveImage(String url, String fileName) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath = '${directory.path}/$fileName';
+    final http.Response response = await http.get(Uri.parse(url));
+    final File file = File(filePath);
+    await file.writeAsBytes(response.bodyBytes);
+
+    return filePath;
   }
 }

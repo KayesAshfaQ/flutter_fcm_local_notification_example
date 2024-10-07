@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'app/firebase_options.dart';
 import 'app/my_app.dart';
-import 'app/services/fcm_service.dart';
-import 'app/services/notification_service.dart';
+import 'app/services/firebase_message_api.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -17,14 +16,14 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  final notificationService = NotificationService();
-  await notificationService.init();
+  // final notificationService = NotificationService();
+  // await notificationService.init();
 
-  final fcmService = FCMService(notificationService);
-  await fcmService.init();
+  // final fcmService = FCMService();
+  // await fcmService.init();
 
   // initialize firebase messaging service
-  //await FirebaseMessageApi().initialize();
+  await FirebaseMessageApi().initialize();
 
   // run the app
   runApp(const MyApp());

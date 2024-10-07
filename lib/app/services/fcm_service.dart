@@ -1,7 +1,9 @@
 import 'dart:developer';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_fcm_local_notification_example/main.dart';
 
+import '../pages/notification_page.dart';
 import 'notification_service.dart';
 
 @pragma('vm:entry-point')
@@ -13,31 +15,40 @@ Future<void> _handleBackgroundMessage(RemoteMessage message) async {
 }
 
 class FCMService {
-  final NotificationService _notificationService;
+  final NotificationService _notificationService = NotificationService();
 
-  FCMService(this._notificationService);
+  // FCMService(this._notificationService);
 
   /// handles message actions when the app is in the foreground or background state
   static void handleMessage(RemoteMessage? message) {
     log('Handling a message: ${message?.messageId}');
 
-    if (message == null) {
-      log('Message is null');
-    } else if (message.data['action'] == null) {
-      log('No action found');
-    } else {
-      // handle the message
-      switch (message.data['action']) {
-        case 'OPEN':
-          log('Opening the app');
-          break;
-        case 'CLOSE':
-          log('Closing the app');
-          break;
-        default:
-          log('No action defined for ${message.data['action']}');
-      }
-    }
+    // handle the message
+    navigatorKey.currentState?.pushNamed(
+      NotificationPage.route,
+      arguments: message,
+    );
+
+    // if (message == null) {
+    //   log('Message is null');
+    // } else if (message.data['action'] == null) {
+    //   log('No action found');
+    // } else {
+    // switch (message.data['action']) {
+    //   case 'OPEN':
+    //     log('Opening the app');
+    //     navigatorKey.currentState?.pushNamed(
+    //       NotificationPage.route,
+    //       arguments: message,
+    //     );
+    //     break;
+    //   case 'CLOSE':
+    //     log('Closing the app');
+    //     break;
+    //   default:
+    //     log('No action defined for ${message.data['action']}');
+    // }
+    // }
   }
 
   Future<void> init() async {
@@ -54,12 +65,14 @@ class FCMService {
       sound: true,
     );
 
-    _setupFirebaseMessaging();
+    await _setupFirebaseMessaging();
   }
 
   /// sets up Firebase Messaging to listen for messages and handle them accordingly
   /// based on the app's state (foreground, background, or terminated)
-  void _setupFirebaseMessaging() {
+  Future _setupFirebaseMessaging() async {
+    
+
     // listen for messages when the app is in the foreground state
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       log('Got a message whilst in the foreground!');
@@ -82,14 +95,22 @@ class FCMService {
     });
 
     // perform an action when the user taps on a notification, when the app is in the terminated state
-    FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
-      if (message != null) {
-        log('App was opened by a notification!');
-        log('Message data: ${message.data}');
-        handleMessage(message);
-      }
-    });
+    // await FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+    //   if (message != null) {
+    //     log('App was opened by a notification!');
+    //     log('Message data: ${message.data}');
+    //     handleMessage(message);
+    //   } else {
+    //     log('No message was found');
+    //   }
+    // });
   }
+
+  /// perform an action when the user taps on a notification, when the app is in the terminated state
+  // static Future<void> onOpenAppFromTerminatedState() async {
+  //   final message = await FirebaseMessaging.instance.getInitialMessage();
+  //   if (message != null) handleMessage(message);
+  // }
 
   Future<void> requestPermission({
     bool alert = true,
