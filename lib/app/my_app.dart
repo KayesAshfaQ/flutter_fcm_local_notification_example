@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'main.dart';
+import '../main.dart';
 import 'pages/home_page.dart';
 import 'pages/notification_page.dart';
 
