@@ -41,6 +41,22 @@ class FCMService {
   }
 
   Future<void> init() async {
+    // request permission to receive notifications
+    await requestPermission();
+
+    // set the foreground notification presentation options
+    await setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    _setupFirebaseMessaging();
+  }
+
+  /// sets up Firebase Messaging to listen for messages and handle them accordingly
+  /// based on the app's state (foreground, background, or terminated)
+  void _setupFirebaseMessaging() {
     // listen for messages when the app is in the foreground state
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       log('Got a message whilst in the foreground!');
@@ -72,8 +88,19 @@ class FCMService {
     });
   }
 
-  Future<void> requestPermission() async {
-    await FirebaseMessaging.instance.requestPermission();
+  Future<void> requestPermission({
+    bool alert = true,
+    bool badge = true,
+    bool sound = true,
+    bool provisional = false,
+  }) async {
+    final settings = await FirebaseMessaging.instance.requestPermission(
+      alert: alert,
+      badge: badge,
+      sound: sound,
+      provisional: provisional,
+    );
+    log('User granted permission: ${settings.authorizationStatus}');
   }
 
   Future<void> setForegroundNotificationPresentationOptions({

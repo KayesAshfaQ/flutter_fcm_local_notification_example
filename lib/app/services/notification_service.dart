@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -41,10 +42,17 @@ class NotificationService {
 
   Future<void> showNotification(RemoteMessage message) async {
     String? bigPicturePath;
+    final notification = message.notification;
 
-    if (message.notification?.android?.imageUrl != null) {
+    // if notification is null, return
+    if (notification == null) {
+      log('Notification is null');
+      return;
+    }
+
+    if (notification.android?.imageUrl != null) {
       bigPicturePath = await _downloadAndSaveImage(
-        message.notification!.android!.imageUrl!,
+        notification.android!.imageUrl!,
         'notification_image_${DateTime.now().millisecondsSinceEpoch}.jpg',
       );
     }
@@ -52,9 +60,9 @@ class NotificationService {
     final bigPictureStyleInformation = bigPicturePath != null
         ? BigPictureStyleInformation(
             FilePathAndroidBitmap(bigPicturePath),
-            contentTitle: message.notification?.title,
+            contentTitle: notification.title,
             htmlFormatContentTitle: true,
-            summaryText: message.notification?.body,
+            summaryText: notification.body,
             htmlFormatSummaryText: true,
           )
         : null;
@@ -75,9 +83,9 @@ class NotificationService {
     );
 
     await flutterLocalNotificationPlugin.show(
-      0,
-      message.notification?.title,
-      message.notification?.body,
+      DateTime.now().millisecondsSinceEpoch,
+      notification.title,
+      notification.body,
       platformChannelSpecifics,
       payload: message.data['payload'],
     );
