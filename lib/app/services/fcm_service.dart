@@ -44,6 +44,9 @@ class FCMService {
     // request permission to receive notifications
     await requestPermission();
 
+    final token = await getToken();
+    log('Token: $token');
+
     // set the foreground notification presentation options
     await setForegroundNotificationPresentationOptions(
       alert: true,

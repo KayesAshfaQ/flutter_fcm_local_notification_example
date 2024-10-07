@@ -83,7 +83,7 @@ class NotificationService {
     );
 
     await flutterLocalNotificationPlugin.show(
-      DateTime.now().millisecondsSinceEpoch,
+      notification.hashCode,
       notification.title,
       notification.body,
       platformChannelSpecifics,
